@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (IncludeLaunchDescription, TimerAction,
+from launch.actions import (AppendEnvironmentVariable, IncludeLaunchDescription, TimerAction,
                             SetEnvironmentVariable)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
@@ -16,6 +16,11 @@ def generate_launch_description():
     # let Gazebo resolve the package:// mesh URIs
     resource_path = SetEnvironmentVariable(
         'IGN_GAZEBO_RESOURCE_PATH', os.path.dirname(desc_pkg))
+
+    set_resource_path = AppendEnvironmentVariable(
+        name='IGN_GAZEBO_RESOURCE_PATH',
+        value='/root/ros2_ws/install/robomaster_description/share'
+    )
 
     ros_gz_sim = get_package_share_directory('ros_gz_sim')
     gz = IncludeLaunchDescription(
@@ -40,7 +45,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        resource_path,
+        set_resource_path,
         gz,
         rsp,
         TimerAction(period=4.0, actions=[spawn]),  # let Gazebo come up first

@@ -1,5 +1,5 @@
 services:
-  ep-sim:
+  robomaster-sim:
     build: .
     network_mode: host
     stdin_open: true

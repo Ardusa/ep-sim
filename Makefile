@@ -1,21 +1,38 @@
-CONTAINER_NAME=ep-sim
+CONTAINER_NAME=robomaster-sim
+DC=docker compose
+EXEC=$(DC) exec robomaster-sim bash -c
+# source ROS + workspace overlay before any ros2/colcon command
+SETUP=source /opt/ros/humble/setup.bash && cd /root/ros2_ws && [ -f install/setup.bash ] && source install/setup.bash;
 
-.PHONY: build up down shell gazebo check-gpu
+.PHONY: build up down shell check-gpu build-ws launch sim rebuild clean
 
 build:
-	docker compose build
+	$(DC) build
 
 up:
-	docker compose up -d
+	$(DC) up -d
 
 down:
-	docker compose down
+	$(DC) down
 
 shell: up
-	docker compose exec ep-sim bash
-
-gazebo: up
-	docker compose exec ep-sim bash -c "source /opt/ros/humble/setup.bash && ign gazebo empty.sdf -r --render-engine ogre"
+	$(DC) exec robomaster-sim bash
 
 check-gpu: up
-	docker compose exec ep-sim nvidia-smi
+	$(DC) exec robomaster-sim nvidia-smi
+
+build-ws: up
+	$(EXEC) "$(SETUP) colcon build --symlink-install"
+
+launch: up
+	$(EXEC) "$(SETUP) ros2 launch robomaster_gazebo spawn.launch.py"
+
+# build the workspace then launch — your daily one-shot
+sim: build-ws launch
+
+# nuke workspace build artifacts and rebuild from clean
+rebuild: up
+	$(EXEC) "cd /root/ros2_ws && rm -rf build install log && $(SETUP) colcon build --symlink-install"
+
+clean: up
+	$(EXEC) "cd /root/ros2_ws && rm -rf build install log"
