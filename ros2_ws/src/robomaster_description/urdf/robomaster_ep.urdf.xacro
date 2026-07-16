@@ -23,7 +23,7 @@
   <xacro:extension tf_prefix="${tf_prefix}" use_rear_extension="true" />
   <xacro:intelligent_controller tf_prefix="${tf_prefix}" mount="extension" />
 
-  <!-- arm + gripper + camera disabled for mecanum-base attack config -->
+  <!-- arm + gripper + camera for mecanum-base attack config -->
   <xacro:arm tf_prefix="${tf_prefix}"/>
   <xacro:camera tf_prefix="${tf_prefix}" mount="arm" camera_yaw="$(arg camera_yaw)"/>
   <xacro:gripper tf_prefix="${tf_prefix}"/>
