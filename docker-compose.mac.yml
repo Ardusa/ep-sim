@@ -8,8 +8,25 @@ services:
       # enabled, and `xhost + 127.0.0.1` run once per session, for rviz/Gazebo GUI.
       - DISPLAY=host.docker.internal:0
       - IGN_GAZEBO_RESOURCE_PATH=/root/ros2_ws/install/robomaster_description/share
-    # Finalize these once the DJI WiFi driver's UDP ports are known.
-    # The RoboMaster EP SDK uses a plaintext control port; map it here so the
-    # container can reach the robot over Docker Desktop's NAT.
-    # ports:
-    #   - "40923:40923/udp"
+    # RoboMaster EP plaintext SDK ports, confirmed against DJI's official
+    # docs (robomaster-dev.readthedocs.io) and the dji-sdk/RoboMaster-SDK
+    # source. All TCP, not UDP — the earlier placeholder comment here was
+    # wrong on that point.
+    #   40923 - control command port (send text commands, get "ok;"/data back)
+    #   40924 - telemetry push port (chassis/gimbal push, once enabled)
+    #   40925 - event port (armor hit, voice recognition, etc.)
+    #   40926 - IP broadcast port (only used in Wi-Fi networking mode, to
+    #            discover the robot's DHCP-assigned IP; not needed in
+    #            direct-connection mode, where the IP is always set in .env)
+    #   40921 - video stream port (raw H.264, only after sending "stream on;")
+    #   40922 - audio stream port (Opus, only after sending "audio on;")
+    # Direct-connection mode only needs 40923 to drive the chassis. The
+    # rest are uncommented here for when video/telemetry get wired in —
+    # trim to just 40923 if you want a smaller attack surface until then.
+    ports:
+      - "40923:40923/tcp"
+      - "40924:40924/tcp"
+      - "40925:40925/tcp"
+      - "40926:40926/tcp"
+      - "40921:40921/tcp"
+      - "40922:40922/tcp"

@@ -24,7 +24,7 @@ EXEC := $(DC) exec robomaster-sim bash -c
 SETUP := source /opt/ros/humble/setup.bash && cd /root/ros2_ws && [ -f install/setup.bash ] && source install/setup.bash;
 
 .DEFAULT_GOAL := help
-.PHONY: help image up down shell check-gpu build bringup sim tether rebuild clean
+.PHONY: help image up down shell check-gpu build bringup sim tether tether-test rebuild clean
 
 help: ## Show this help
 	@echo "platform: $(PLATFORM)"
@@ -61,8 +61,11 @@ ifneq ($(IS_WSL),1)
 endif
 	$(EXEC) "$(SETUP) ros2 launch robomaster_gazebo sim.launch.py"
 
-tether: build ## Bringup + physical RoboMaster driver (scaffolding: placeholder node)
-	$(EXEC) "$(SETUP) ros2 launch robomaster_gazebo tether.launch.py"
+tether: build ## Bringup + physical RoboMaster driver
+	$(EXEC) "$(SETUP) ros2 launch robomaster_driver tether.launch.py"
+
+tether-test: build ## Standalone TCP connectivity check against the real robot (no ros2_control)
+	$(EXEC) "$(SETUP) ros2 run robomaster_driver connection_test"
 
 # --- maintenance -----------------------------------------------------------
 rebuild: up ## Nuke build artifacts and rebuild the workspace clean

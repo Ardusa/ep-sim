@@ -1,0 +1,29 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz. Plaintext SDK docs don't publish a max command
+                      # rate; 50Hz is a conservative starting point given
+                      # each write() is a blind fire-and-forget UDP-like
+                      # send over TCP. Raise once you've confirmed the
+                      # robot doesn't choke on it.
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    wheel_velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+wheel_velocity_controller:
+  ros__parameters:
+    joints:
+      - front_right_wheel_joint
+      - front_left_wheel_joint
+      - rear_right_wheel_joint
+      - rear_left_wheel_joint
+
+# NOTE: this publishes raw per-wheel velocity commands, not cmd_vel/Twist.
+# teleop_twist_keyboard (already in the Dockerfile) publishes Twist, which
+# nothing here consumes yet. ros2_controllers on Humble doesn't ship a
+# mecanum_drive_controller (that landed in later distros) - the Twist ->
+# four-wheel-rpm mapping needs either a small custom node or backporting
+# that controller. Not blocking connection_test or direct wheel
+# velocity commands via `ros2 topic pub` - only blocking teleop.

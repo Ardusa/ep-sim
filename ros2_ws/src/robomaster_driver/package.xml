@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>robomaster_driver</name>
+    <version>0.0.1</version>
+    <description>C++ ros2_control hardware interface for the physical DJI RoboMaster EP over its
+        plaintext SDK (TCP 40923). Counterpart to gz_ros2_control on the sim side.</description>
+    <maintainer email="desaia11@msu.edu">Ankur</maintainer>
+    <license>MIT</license>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <depend>rclcpp</depend>
+    <depend>rclcpp_lifecycle</depend>
+    <depend>hardware_interface</depend>
+    <depend>pluginlib</depend>
+
+    <exec_depend>robomaster_gazebo</exec_depend>
+    <exec_depend>launch</exec_depend>
+    <exec_depend>launch_ros</exec_depend>
+    <exec_depend>controller_manager</exec_depend>
+
+    <test_depend>ament_lint_auto</test_depend>
+    <test_depend>ament_lint_common</test_depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+        <hardware_interface plugin="${prefix}/robomaster_driver.xml" />
+    </export>
+</package>

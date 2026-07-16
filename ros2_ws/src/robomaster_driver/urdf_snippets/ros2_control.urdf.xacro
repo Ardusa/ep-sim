@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+  ros2_control hardware description for the physical robot. Included
+  from robomaster_ep.urdf.xacro only in the tether (real-robot) launch
+  path - sim.launch.py's Gazebo spawn uses gz_ros2_control's own
+  <ros2_control> block instead (added when that integration lands),
+  not this one. The two are mutually exclusive: don't include both for
+  the same run, controller_manager will fight over the joint names.
+
+  Joint names below must exactly match wheel.urdf.xacro's
+  ${tf_prefix}${name}_wheel_joint output for tf_prefix='' (single-robot,
+  no namespacing - matches the current sim spawn args in sim.launch.py).
+-->
+<robot xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#xacro">
+
+    <xacro:macro name="ros2_control"
+        params="robot_ip:=${robot_ip} control_port:=40923 wheel_radius_m:=0.05">
+        <ros2_control name="RobomasterSystem" type="system">
+            <hardware>
+                <plugin>robomaster_driver/HardwareInterface</plugin>
+                <param name="robot_ip">${robot_ip}</param>
+                <param name="control_port">${control_port}</param>
+                <param name="wheel_radius_m">${wheel_radius_m}</param>
+            </hardware>
+
+            <joint name="front_right_wheel_joint">
+                <command_interface name="velocity" />
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="front_left_wheel_joint">
+                <command_interface name="velocity" />
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="rear_right_wheel_joint">
+                <command_interface name="velocity" />
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="rear_left_wheel_joint">
+                <command_interface name="velocity" />
+                <state_interface name="velocity" />
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+
+</robot>

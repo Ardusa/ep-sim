@@ -1,0 +1,12 @@
+<library path="robomaster_driver">
+    <class name="robomaster_driver/HardwareInterface"
+        type="robomaster_driver::HardwareInterface"
+        base_class_type="hardware_interface::SystemInterface">
+        <description>
+            ros2_control SystemInterface for the physical DJI RoboMaster EP,
+            driving the chassis over the plaintext SDK (TCP 40923). Reference
+            this class name from the URDF's &lt;ros2_control&gt;&lt;hardware&gt;&lt;plugin&gt;
+            tag, same slot gz_ros2_control's plugin occupies in the sim URDF.
+        </description>
+    </class>
+</library>

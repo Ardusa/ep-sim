@@ -16,7 +16,8 @@ import xacro
 def generate_launch_description():
     desc_pkg = get_package_share_directory("robomaster_description")
     xacro_file = os.path.join(desc_pkg, "urdf", "robomaster_ep.urdf.xacro")
-    robot_description = xacro.process_file(xacro_file).toxml()
+    robot_ip = os.environ.get("ROBOMASTER_IP")
+    robot_description = xacro.process_file(xacro_file, mappings={"robot_ip": robot_ip}).toxml()
 
     rsp = Node(
         package="robot_state_publisher",
