@@ -1,6 +1,7 @@
 services:
   robomaster-sim:
     build: .
+    platform: linux/amd64
     stdin_open: true
     tty: true
     volumes:
