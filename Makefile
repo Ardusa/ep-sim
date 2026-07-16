@@ -3,6 +3,19 @@
 #   WSL2   : base + wsl2  (GPU + WSLg display, full Gazebo)
 #   Mac    : base + mac   (no GPU, XQuartz display, port-mapped networking)
 #   Linux  : base only
+#
+# GUI targets (rviz/Gazebo/ffplay) draw on the host, not in the container: the
+# container is the X client, the host runs the X server. All the client-side
+# wiring is env in the compose overrides - see docker-compose.mac.yml.
+#
+# Mac only, one-time host setup (WSLg and native Linux need none):
+#     brew install --cask xquartz
+#     defaults write org.xquartz.X11 nolisten_tcp -bool false  # listen on :0
+#     defaults write org.xquartz.X11 no_auth      -bool true   # trust the NAT
+#     defaults write org.xquartz.X11 enable_iglx  -bool true   # indirect GLX
+# then start XQuartz (it must be running for any GUI target). These persist,
+# so this is a once-per-machine thing, not a per-run step. Without the first
+# two, ffplay dies with "Could not initialize SDL - No available video device".
 # ---------------------------------------------------------------------------
 UNAME_S := $(shell uname -s)
 IS_WSL  := $(shell grep -qi microsoft /proc/version 2>/dev/null && echo 1)
@@ -20,11 +33,10 @@ endif
 
 DC   := docker compose $(COMPOSE_FILES)
 EXEC := $(DC) exec robomaster-sim bash -c
-# source ROS + workspace overlay before any ros2/colcon command
 SETUP := source /opt/ros/humble/setup.bash && cd /root/ros2_ws && [ -f install/setup.bash ] && source install/setup.bash;
 
 .DEFAULT_GOAL := help
-.PHONY: help image up down shell check-gpu build bringup sim tether tether-test rebuild clean
+.PHONY: help image up down shell check-gpu build bringup sim tether tether-test tether-cams rebuild clean
 
 help: ## Show this help
 	@echo "platform: $(PLATFORM)"
@@ -64,8 +76,13 @@ endif
 tether: build ## Bringup + physical RoboMaster driver
 	$(EXEC) "$(SETUP) ros2 launch robomaster_driver tether.launch.py"
 
-tether-test: build ## Standalone TCP connectivity check against the real robot (no ros2_control)
+tether-test: build ## Standalone TCP connectivity check against the real robot
 	$(EXEC) "$(SETUP) ros2 run robomaster_driver connection_test"
+
+tether-cams: build ## View the live H.264 camera feed from the physical robot
+	$(EXEC) "set -o pipefail; $(SETUP) \
+	  python3 \$$(ros2 pkg prefix robomaster_driver)/lib/robomaster_driver/stream_view.py \
+	  | ffplay -hide_banner -loglevel error -autoexit -f h264 -probesize 32 -i -"
 
 # --- maintenance -----------------------------------------------------------
 rebuild: up ## Nuke build artifacts and rebuild the workspace clean

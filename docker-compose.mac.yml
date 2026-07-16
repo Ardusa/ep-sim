@@ -4,9 +4,10 @@
 services:
   robomaster-sim:
     environment:
-      # XQuartz must be running with "Allow connections from network clients"
-      # enabled, and `xhost + 127.0.0.1` run once per session, for rviz/Gazebo GUI.
       - DISPLAY=host.docker.internal:0
+      - SDL_RENDER_DRIVER=software
+      - SDL_FRAMEBUFFER_ACCELERATION=0
+      - LIBGL_ALWAYS_SOFTWARE=1
       - IGN_GAZEBO_RESOURCE_PATH=/root/ros2_ws/install/robomaster_description/share
     # RoboMaster EP plaintext SDK ports, confirmed against DJI's official
     # docs (robomaster-dev.readthedocs.io) and the dji-sdk/RoboMaster-SDK

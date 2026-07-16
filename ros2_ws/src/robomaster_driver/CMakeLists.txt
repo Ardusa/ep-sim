@@ -52,9 +52,12 @@ install(
   RUNTIME DESTINATION bin
 )
 install(TARGETS connection_test DESTINATION lib/${PROJECT_NAME})
+
+install(PROGRAMS scripts/stream_view.py DESTINATION lib/${PROJECT_NAME})
+
 install(DIRECTORY include/ DESTINATION include)
 install(FILES robomaster_driver.xml DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch urdf config DESTINATION share/${PROJECT_NAME})
 
 ament_export_include_directories(include)
 ament_export_libraries(tcp_client robomaster_driver)

@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
     ros-humble-teleop-twist-keyboard \
     ros-humble-joint-state-publisher \
     python3-colcon-common-extensions \
+    ffmpeg \
+    libgl1-mesa-dri \
+    libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
