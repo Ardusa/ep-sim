@@ -11,6 +11,14 @@
   </xacro:if>
   <xacro:arg name="camera_yaw" default="0.0" />
 
+  <!-- Picks which <ros2_control> block is emitted. See ros2_control.urdf.xacro. -->
+  <xacro:arg name="sim" default="false" />
+  <!-- Empty, never a plausible-looking IP: unset must fail (in bringup.launch.py,
+       or on_init if it gets this far), not silently dial the wrong robot. -->
+  <xacro:arg name="robot_ip" default="" />
+  <xacro:arg name="sim_controllers_file" default="" />
+  <xacro:property name="_sim" value="${'$(arg sim)'.lower() == 'true'}" />
+
   <xacro:include filename="base.urdf.xacro" />
   <xacro:include filename="arm.urdf.xacro" />
   <xacro:include filename="camera.urdf.xacro" />
@@ -18,6 +26,7 @@
   <xacro:include filename="intelligent_controller.urdf.xacro" />
   <xacro:include filename="extension.urdf.xacro" />
   <xacro:include filename="tof.urdf.xacro" />
+  <xacro:include filename="ros2_control.urdf.xacro" />
 
   <xacro:base tf_prefix="${tf_prefix}" />
   <xacro:extension tf_prefix="${tf_prefix}" use_rear_extension="true" />
@@ -25,12 +34,16 @@
 
   <!-- arm + gripper + camera for mecanum-base attack config -->
   <xacro:arm tf_prefix="${tf_prefix}"/>
-  <xacro:camera tf_prefix="${tf_prefix}" mount="arm" camera_yaw="$(arg camera_yaw)"/>
+  <xacro:camera tf_prefix="${tf_prefix}" mount="arm" camera_yaw="$(arg camera_yaw)" sim="${_sim}"/>
   <xacro:gripper tf_prefix="${tf_prefix}"/>
 
   <xacro:add_tof index="0" tf_prefix="${tf_prefix}" />
   <xacro:add_tof index="1" tf_prefix="${tf_prefix}" />
   <xacro:add_tof index="2" tf_prefix="${tf_prefix}" />
   <xacro:add_tof index="3" tf_prefix="${tf_prefix}" />
+
+  <xacro:ros2_control sim="${_sim}" tf_prefix="${tf_prefix}"
+    robot_ip="$(arg robot_ip)"
+    sim_controllers_file="$(arg sim_controllers_file)" />
 
 </robot>

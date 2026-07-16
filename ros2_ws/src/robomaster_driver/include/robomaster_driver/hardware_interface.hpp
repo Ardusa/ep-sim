@@ -78,9 +78,17 @@ private:
   // ros2_control block; needed to convert rad/s -> the SDK's rpm.
   double wheel_radius_m_ =
       0.05; // matches wheel collision radius in wheel.urdf.xacro
-  std::string robot_ip_ = std::getenv(
-      "ROBOMASTER_IP"); // direct-connection default, see connection.html
+  // No default: on_init() fails if the URDF didn't set it. Deliberately not
+  // read from ROBOMASTER_IP here - bringup.launch.py already resolves that
+  // env var into the URDF param, and getenv() returning nullptr on an unset
+  // var would construct std::string from nullptr (UB).
+  std::string robot_ip_;
   int control_port_ = 40923;
+
+  // Arms the camera on activate. The control port takes one client and this
+  // interface holds it, so nothing else can send "stream on" while tethered -
+  // camera_node.py then just reads the video port.
+  bool enable_video_ = true;
 
   std::unique_ptr<TcpClient> tcp_client_;
   rclcpp::Clock steady_clock_{

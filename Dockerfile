@@ -7,7 +7,19 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ros2-controllers \
     ros-humble-teleop-twist-keyboard \
     ros-humble-joint-state-publisher \
+# NOTE: no ros-humble-twist-mux — its binary links libdiagnostic_updater.so,
+# which no ros-humble-diagnostic-updater in the repos ships. robomaster_bringup
+# has a small cmd_vel_mux instead.
+
+    ros-humble-apriltag-ros \
+    ros-humble-apriltag-msgs \
+    ros-humble-cv-bridge \
+    ros-humble-image-transport \
+    ros-humble-image-proc \
+    ros-humble-rqt-image-view \
     python3-colcon-common-extensions \
+    python3-av \
+    python3-opencv \
     ffmpeg \
     libgl1-mesa-dri \
     libgl1-mesa-glx \

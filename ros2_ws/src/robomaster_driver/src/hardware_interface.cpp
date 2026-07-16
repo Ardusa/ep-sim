@@ -39,10 +39,22 @@ hardware_interface::CallbackReturn HardwareInterface::on_init(
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  // Optional overrides from the URDF <ros2_control><hardware><param> block,
-  // falling back to the direct-connection defaults if not set.
+  // Required: fail loudly here rather than time out against 0.0.0.0 later.
   if (info_.hardware_parameters.count("robot_ip")) {
     robot_ip_ = info_.hardware_parameters.at("robot_ip");
+  }
+  if (robot_ip_.empty()) {
+    RCLCPP_ERROR(get_logger(),
+                 "robot_ip is unset. It comes from ROBOMASTER_IP via "
+                 "bringup.launch.py - set it in .env (direct-connect AP mode "
+                 "is usually 192.168.2.1).");
+    return hardware_interface::CallbackReturn::ERROR;
+  }
+
+  // Optional overrides from the URDF <ros2_control><hardware><param> block,
+  // falling back to the direct-connection defaults if not set.
+  if (info_.hardware_parameters.count("enable_video")) {
+    enable_video_ = info_.hardware_parameters.at("enable_video") == "true";
   }
   if (info_.hardware_parameters.count("control_port")) {
     control_port_ = std::stoi(info_.hardware_parameters.at("control_port"));
@@ -109,6 +121,22 @@ hardware_interface::CallbackReturn HardwareInterface::on_activate(
   std::string response;
   tcp_client_->send_command("robot mode free", response);
 
+  // Arm the camera from here because this interface owns the control port for
+  // the whole session; camera_node.py can then read the video port without
+  // needing a second client. Non-fatal: a robot with no camera should still
+  // drive.
+  if (enable_video_) {
+    if (!tcp_client_->send_command("stream on", response) || response != "ok") {
+      RCLCPP_WARN(get_logger(),
+                  "'stream on' failed (got '%s') - driving is unaffected, but "
+                  "camera_node will find no video. Set enable_video false to "
+                  "skip this.",
+                  response.c_str());
+    } else {
+      RCLCPP_INFO(get_logger(), "video stream armed on port 40921.");
+    }
+  }
+
   wheel_velocity_command_.fill(0.0);
   wheel_velocity_state_.fill(0.0);
 
@@ -122,6 +150,9 @@ hardware_interface::CallbackReturn HardwareInterface::on_deactivate(
     // Stop the chassis before dropping the connection - don't leave
     // it coasting on whatever the last command was.
     tcp_client_->send_fire_and_forget("chassis wheel w1 0 w2 0 w3 0 w4 0");
+    if (enable_video_) {
+      tcp_client_->send_fire_and_forget("stream off");
+    }
     tcp_client_->disconnect();
     tcp_client_.reset();
   }

@@ -2,14 +2,17 @@
 <package format="3">
   <name>robomaster_gazebo</name>
   <version>0.0.1</version>
-  <description>Gazebo bringup for the RoboMaster EP</description>
+  <description>Gazebo backend for the RoboMaster EP: only the sim-specific pieces
+    (Gazebo, the robot spawn, the camera/clock bridges). robomaster_bringup
+    includes this and supplies everything shared with the real robot.</description>
   <maintainer email="desaia11@msu.edu">Ankur</maintainer>
   <license>MIT</license>
 
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>xacro</exec_depend>
-  <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>robomaster_description</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_image</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

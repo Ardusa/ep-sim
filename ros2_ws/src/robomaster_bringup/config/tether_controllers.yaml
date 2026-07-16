@@ -1,0 +1,43 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz. Plaintext SDK docs don't publish a max command
+                      # rate; 50Hz is a conservative starting point given
+                      # each write() is a blind fire-and-forget UDP-like
+                      # send over TCP. Raise once you've confirmed the
+                      # robot doesn't choke on it.
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    mecanum_drive_controller:
+      type: mecanum_drive_controller/MecanumDriveController
+
+mecanum_drive_controller:
+  ros__parameters:
+    reference_timeout: 0.5  # seconds with no new Twist before wheels are
+                             # zeroed - matters more here than in sim, a
+                             # dropped Wi-Fi link should stop the robot.
+    use_stamped_vel: false  # plain Twist on .../reference_unstamped, matches
+                             # teleop_twist_keyboard's default (unstamped) output
+
+    front_left_wheel_command_joint_name: "front_left_wheel_joint"
+    front_right_wheel_command_joint_name: "front_right_wheel_joint"
+    rear_right_wheel_command_joint_name: "rear_right_wheel_joint"
+    rear_left_wheel_command_joint_name: "rear_left_wheel_joint"
+
+    kinematics:
+      base_frame_offset: { x: 0.0, y: 0.0, theta: 0.0 }
+      wheels_radius: 0.05  # matches wheel.urdf.xacro collision cylinder radius
+      # lx + ly: half-wheelbase (0.1m) + half-track-width (0.1m), from the
+      # wheel xyz offsets in base.urdf.xacro (front_left "0.1 0.1 ...", etc).
+      sum_of_robot_center_projection_on_X_Y_axis: 0.2
+
+    base_frame_id: "base_link"
+    odom_frame_id: "odom"
+    enable_odom_tf: true
+
+# Near-identical to sim_controllers.yaml next door (same joints, same
+# kinematics) so teleop behaves the same on both backends. They differ only
+# where the backends genuinely do: update_rate and use_sim_time. Kept as two
+# files so each backend's numbers are readable on their own; the duplication is
+# at least visible in one directory now.

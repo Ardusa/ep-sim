@@ -407,7 +407,10 @@
       <limit effort="0" velocity="0" />
     </joint>
 
-    <joint name="${tf_prefix}gripper_link" type="fixed">
+    <!-- Named _joint, not gripper_link: SDF frame names span links AND joints,
+         so sharing the name with the child link makes Gazebo reject the model
+         ("frame with name[gripper_link] already exists"). URDF alone tolerates it. -->
+    <joint name="${tf_prefix}gripper_joint" type="fixed">
       <origin xyz="0.0002793 -0.027026 0.0001815" rpy="0 0 0" />
       <parent link="${tf_prefix}endpoint_bracket_link" />
       <child link="${tf_prefix}gripper_link" />

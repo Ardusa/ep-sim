@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>robomaster_bringup</name>
+    <version>0.0.1</version>
+    <description>Backend-agnostic bringup and control layer for the RoboMaster EP.
+
+        Owns everything both backends share: robot_state_publisher, the controller
+        spawners, twist arbitration, and both controller configs. robomaster_gazebo
+        and robomaster_driver each depend on this and not on each other, so the
+        real-robot path no longer pulls in a simulation package to find shared
+        launch files.</description>
+    <maintainer email="ardusa05@gmail.com">Ankur</maintainer>
+    <license>MIT</license>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+    <!-- bringup.launch.py includes whichever backend SIM names, so it depends on
+         both. The backends depend on this for the shared layers, but not on each
+         other, and none of them reach across the sim/real split. -->
+    <exec_depend>robomaster_description</exec_depend>
+    <exec_depend>robomaster_gazebo</exec_depend>
+    <exec_depend>robomaster_driver</exec_depend>
+    <exec_depend>robomaster_camera</exec_depend>
+    <exec_depend>robomaster_detection</exec_depend>
+    <exec_depend>launch</exec_depend>
+    <exec_depend>launch_ros</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+    <exec_depend>joint_state_publisher</exec_depend>
+    <exec_depend>controller_manager</exec_depend>
+    <exec_depend>mecanum_drive_controller</exec_depend>
+    <exec_depend>joint_state_broadcaster</exec_depend>
+    <exec_depend>rclpy</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
+    <exec_depend>xacro</exec_depend>
+
+    <test_depend>ament_lint_auto</test_depend>
+    <test_depend>ament_lint_common</test_depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>

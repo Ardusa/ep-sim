@@ -280,8 +280,13 @@
       <inertial>
         <origin xyz="0.1417841 0.0321051 -0.1257179" rpy="0 0 0" />
         <mass value="0.009" />
-        <inertia ixx="0.0205056" ixy="0.0021202" ixz="-0.0023248" iyy="0.0097562" iyz="0.0101162"
-          izz="0.0117256" />
+        <!-- Placeholder, not measured. The exported tensor here was physically
+             impossible (principal moments failed the triangle inequality) and
+             ~1000x too large for a 9g part, so Gazebo rejected the whole model.
+             This is a cosmetic linkage that nothing drives; if the arm ever
+             needs real dynamics, re-export this about the link's own centre
+             of mass. -->
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5" />
       </inertial>
       <visual name="triangle">
         <origin xyz="-0.0095953 0 0.0131247" rpy="0 0 0" />

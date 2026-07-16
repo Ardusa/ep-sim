@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+  The robot's <ros2_control> block, in both flavours. Mutually exclusive:
+  emitting both makes controller_manager fight over the same joint names.
+
+  Lives here rather than in robomaster_driver because the plugin is named as a
+  string (pluginlib resolves it at runtime), so this costs no dependency —
+  whereas the reverse would make description depend on driver.
+
+  Joint names must match wheel.urdf.xacro's ${tf_prefix}${name}_wheel_joint.
+-->
+<robot xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#xacro">
+
+  <xacro:macro name="wheel_ros2_control_joints" params="tf_prefix=''">
+    <joint name="${tf_prefix}front_right_wheel_joint">
+      <command_interface name="velocity" />
+      <state_interface name="velocity" />
+      <state_interface name="position" />
+    </joint>
+    <joint name="${tf_prefix}front_left_wheel_joint">
+      <command_interface name="velocity" />
+      <state_interface name="velocity" />
+      <state_interface name="position" />
+    </joint>
+    <joint name="${tf_prefix}rear_right_wheel_joint">
+      <command_interface name="velocity" />
+      <state_interface name="velocity" />
+      <state_interface name="position" />
+    </joint>
+    <joint name="${tf_prefix}rear_left_wheel_joint">
+      <command_interface name="velocity" />
+      <state_interface name="velocity" />
+      <state_interface name="position" />
+    </joint>
+  </xacro:macro>
+
+  <!-- sim_controllers_file is passed in, not $(find robomaster_gazebo)'d:
+       description must not reference a package that depends on it. -->
+  <xacro:macro name="ros2_control"
+    params="sim:=false tf_prefix='' robot_ip:=''
+            control_port:=40923 wheel_radius_m:=0.05
+            sim_controllers_file:=''">
+
+    <xacro:unless value="${sim}">
+      <ros2_control name="RobomasterSystem" type="system">
+        <hardware>
+          <plugin>robomaster_driver/HardwareInterface</plugin>
+          <param name="robot_ip">${robot_ip}</param>
+          <param name="control_port">${control_port}</param>
+          <param name="wheel_radius_m">${wheel_radius_m}</param>
+        </hardware>
+        <xacro:wheel_ros2_control_joints tf_prefix="${tf_prefix}" />
+      </ros2_control>
+    </xacro:unless>
+
+    <xacro:if value="${sim}">
+      <ros2_control name="RobomasterSimSystem" type="system">
+        <hardware>
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+        <xacro:wheel_ros2_control_joints tf_prefix="${tf_prefix}" />
+      </ros2_control>
+
+      <!-- Loads controller_manager inside the Gazebo process, so sim needs no
+           standalone ros2_control_node. -->
+      <gazebo>
+        <plugin filename="gz_ros2_control-system"
+          name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+          <parameters>${sim_controllers_file}</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

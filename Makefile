@@ -26,14 +26,17 @@ EXEC := $(DC) exec robomaster-sim bash -c
 SETUP := source /opt/ros/humble/setup.bash && cd /root/ros2_ws && [ -f install/setup.bash ] && source install/setup.bash;
 
 .DEFAULT_GOAL := help
-.PHONY: help image up down shell check-gpu build bringup sim tether tether-test tether-cams rebuild clean
+.PHONY: help image up down shell build test-gpu test-connection bringup \
+        bringup-teleop bringup-camera bringup-detection rebuild clean
 
 help: ## Show this help
 	@echo "platform: $(PLATFORM)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-# --- container lifecycle (literal docker compose) --------------------------
+
+# --- Container Lifecycle ----------------------------------------------------
+
 image: ## Build the Docker image (rarely needed)
 	$(DC) build
 
@@ -46,35 +49,44 @@ down: ## Stop and remove the container
 shell: up ## Open a bash shell in the container
 	$(DC) exec robomaster-sim bash
 
-check-gpu: up ## nvidia-smi inside the container (WSL2 only)
-	$(DC) exec robomaster-sim nvidia-smi
-
-# --- workspace build -------------------------------------------------------
 build: up ## Colcon-build the ROS2 workspace
 	$(EXEC) "$(SETUP) colcon build --symlink-install"
 
-# --- ROS2 layer: shared bringup + two backends -----------------------------
-bringup: build ## Launch shared ROS2 nodes only (headless, no sim/robot)
-	$(EXEC) "$(SETUP) ros2 launch robomaster_gazebo bringup.launch.py"
 
-sim: build ## Bringup + Gazebo (Windows/WSL2 GPU; runs but unusably slow on Mac)
-ifneq ($(IS_WSL),1)
-	@echo "WARNING: Gazebo has no GPU passthrough on '$(PLATFORM)'. Expect unusable performance."
-endif
-	$(EXEC) "$(SETUP) ros2 launch robomaster_gazebo sim.launch.py"
+# --- Testing ---------------------------------------------------------------
 
-tether: build ## Bringup + physical RoboMaster driver
-	$(EXEC) "$(SETUP) ros2 launch robomaster_driver tether.launch.py"
+test-gpu: up ## nvidia-smi inside the container (WSL2 only)
+	$(DC) exec robomaster-sim nvidia-smi
 
-tether-test: build ## Standalone TCP connectivity check against the real robot
+test-connection: build ## Standalone TCP connectivity check against the real robot
 	$(EXEC) "$(SETUP) ros2 run robomaster_driver connection_test"
 
-tether-cams: build ## View the live H.264 camera feed from the physical robot
-	$(EXEC) "set -o pipefail; $(SETUP) \
-	  python3 \$$(ros2 pkg prefix robomaster_driver)/lib/robomaster_driver/stream_view.py \
-	  | ffplay -hide_banner -loglevel error -autoexit -f h264 -probesize 32 -i -"
 
-# --- maintenance -----------------------------------------------------------
+# --- ROS2 Bringup -----------------------------------------------------------
+
+bringup: build ## Bring up the robot (backend per SIM in .env)
+ifneq ($(IS_WSL),1)
+	@echo "NOTE: no GPU passthrough on '$(PLATFORM)'. If SIM=true, expect Gazebo to crawl (try HEADLESS=1)."
+endif
+	$(EXEC) "$(SETUP) ros2 launch robomaster_bringup bringup.launch.py \
+	  headless:=$(if $(filter 1,$(HEADLESS)),true,false)"
+
+bringup-teleop: up ## Drive with the keyboard (run alongside bringup)
+	$(DC) exec robomaster-sim bash -c "$(SETUP) \
+	  ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+	  --ros-args -r /cmd_vel:=/cmd_vel_teleop"
+
+bringup-camera: up ## Watch the camera stream
+	$(DC) exec robomaster-sim bash -c "$(SETUP) \
+	  ros2 run rqt_image_view rqt_image_view /camera/image_raw"
+
+bringup-detection: build ## AprilTag detection + overlay on its own
+	$(EXEC) "$(SETUP) ros2 launch robomaster_detection detection.launch.py \
+	  sim:=$${SIM}"
+
+
+# --- Maintenance ------------------------------------------------------------
+
 rebuild: up ## Nuke build artifacts and rebuild the workspace clean
 	$(EXEC) "cd /root/ros2_ws && rm -rf build install log && $(SETUP) colcon build --symlink-install"
 

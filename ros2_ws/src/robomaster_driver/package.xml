@@ -15,10 +15,12 @@
     <depend>hardware_interface</depend>
     <depend>pluginlib</depend>
 
-    <exec_depend>robomaster_gazebo</exec_depend>
     <exec_depend>launch</exec_depend>
     <exec_depend>launch_ros</exec_depend>
     <exec_depend>controller_manager</exec_depend>
+
+    <!-- tether.launch.py brings the camera up alongside the driver -->
+    <exec_depend>robomaster_camera</exec_depend>
 
     <test_depend>ament_lint_auto</test_depend>
     <test_depend>ament_lint_common</test_depend>

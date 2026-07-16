@@ -43,7 +43,9 @@
       <parent link="${tf_prefix}chassis_base_link" />
       <child link="${tf_prefix}${name}_wheel_link" />
       <axis xyz="0 1.0 0" />
-      <limit effort="0" velocity="0" />
+      <!-- Must be non-zero or gz_ros2_control clamps wheel commands to 0.
+           velocity is the SDK's 1000 rpm cap in rad/s; effort is a guess. -->
+      <limit effort="5.0" velocity="104.7" />
     </joint>
 
   </xacro:macro>

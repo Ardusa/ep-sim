@@ -1,0 +1,24 @@
+# Highest active priority wins. Teleop outranks autonomy so grabbing the
+# keyboard overrides the chaser rather than fighting it.
+#
+# timeout = how long a topic stays active after its last message; keep it above
+# the producer's publish period or that input stutters in and out. Separate
+# from the controller's reference_timeout, which zeroes the wheels when nothing
+# at all is publishing.
+#
+# topics_names duplicates the keys under topics: ROS 2 parameters are a flat
+# map, so a node can't enumerate a nested dict's keys — it has to be told them.
+# twist_mux's own YAML doesn't need it; drop it if you ever swap back.
+cmd_vel_mux:
+  ros__parameters:
+    topics_names: ["teleop", "autonomy"]
+
+    topics:
+      teleop:
+        topic: cmd_vel_teleop
+        timeout: 0.5
+        priority: 100
+      autonomy:
+        topic: cmd_vel_autonomy
+        timeout: 0.5
+        priority: 10

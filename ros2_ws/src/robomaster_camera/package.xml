@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robomaster_camera</name>
+  <version>0.0.1</version>
+  <description>Video acquisition from the physical RoboMaster EP: decodes the
+    H.264 stream off the SDK's video port into sensor_msgs/Image + CameraInfo.
+
+    The real-robot opposite number of robomaster_gazebo's camera sensor, and the
+    producer robomaster_detection consumes. Split out of robomaster_driver
+    because that package must be ament_cmake for the C++ hardware plugin, which
+    has no console_scripts — this is ament_python, so the node is a real entry
+    point instead of a wrapper script.</description>
+  <maintainer email="ardusa05@gmail.com">Ankur</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>python3-av</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
